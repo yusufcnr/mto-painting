@@ -376,12 +376,24 @@ figure.media { margin: 0; aspect-ratio: 4/3; border-radius: var(--radius-lg); ov
 }
 .gallery-item:hover .overlay { opacity: 1; }
 
-/* Before / after slider */
-.ba-wrap { position: relative; aspect-ratio: 4/3; border-radius: var(--radius-lg); overflow: hidden; }
-.ba-wrap .ba-after { position: absolute; inset: 0; }
-.ba-wrap .ba-before { position: absolute; inset: 0; width: 50%; overflow: hidden; border-right: 3px solid var(--gold-500); }
-.ba-wrap .ba-before > * { width: 200%; max-width: 200%; height: 100%; }
-.ba-label { position: absolute; top: 12px; z-index: 3; background: rgba(10,26,47,.75); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
+/* Before / after slider (drag or tap to compare; arrow keys when focused) */
+.ba-wrap { position: relative; aspect-ratio: 4/3; border-radius: var(--radius-lg); overflow: hidden; cursor: ew-resize; touch-action: pan-y; user-select: none; }
+.ba-wrap .ba-after, .ba-wrap .ba-before { position: absolute; inset: 0; }
+.ba-wrap .ba-before { clip-path: inset(0 50% 0 0); }
+.ba-handle {
+  position: absolute; top: 0; bottom: 0; left: 50%; z-index: 3;
+  transform: translateX(-50%);
+  border-left: 3px solid var(--gold-500);
+  display: flex; align-items: center; justify-content: center;
+  cursor: ew-resize;
+}
+.ba-handle:focus-visible::after { outline: 3px solid var(--gold-400); outline-offset: 2px; }
+.ba-handle::after {
+  content: ""; position: absolute; width: 42px; height: 42px; border-radius: 50%;
+  background: var(--gold-500); box-shadow: var(--shadow-md);
+}
+.ba-handle svg { position: relative; z-index: 1; width: 20px; height: 20px; fill: none; stroke: var(--navy-950); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.ba-label { position: absolute; top: 12px; z-index: 2; background: rgba(10,26,47,.75); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; pointer-events: none; }
 .ba-label.before { left: 12px; }
 .ba-label.after { right: 12px; }
 

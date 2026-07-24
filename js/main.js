@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initFaq();
   initGalleryFilter();
   initLightbox();
+  initBeforeAfter();
   initContactForm();
   initYear();
 });
@@ -23,16 +24,21 @@ function initMobileNav() {
   const scrim = document.querySelector(".nav-scrim");
   if (!toggle || !nav) return;
 
-  const close = () => {
-    nav.classList.remove("open");
-    document.body.classList.remove("nav-open");
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.setAttribute("aria-controls", nav.id || "mainNav");
+
+  const setOpen = (open) => {
+    nav.classList.toggle("open", open);
+    document.body.classList.toggle("nav-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
   };
-  toggle.addEventListener("click", () => {
-    nav.classList.toggle("open");
-    document.body.classList.toggle("nav-open");
-  });
+  const close = () => setOpen(false);
+  toggle.addEventListener("click", () => setOpen(!nav.classList.contains("open")));
   scrim?.addEventListener("click", close);
   nav.querySelectorAll("a").forEach((a) => a.addEventListener("click", close));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && nav.classList.contains("open")) close();
+  });
 }
 
 /* ---------- Image placeholder fallback ----------
@@ -90,12 +96,35 @@ function initScrollReveal() {
 
 /* ---------- FAQ accordion ---------- */
 function initFaq() {
-  document.querySelectorAll(".faq-item").forEach((item) => {
+  document.querySelectorAll(".faq-item").forEach((item, i) => {
     const q = item.querySelector(".faq-q");
-    q?.addEventListener("click", () => {
+    if (!q) return;
+    const panelId = `faq-panel-${i}`;
+    const answer = item.querySelector(".faq-a");
+    if (answer) answer.id = panelId;
+    q.setAttribute("role", "button");
+    q.setAttribute("tabindex", "0");
+    q.setAttribute("aria-controls", panelId);
+    q.setAttribute("aria-expanded", String(item.classList.contains("open")));
+
+    const toggle = () => {
       const wasOpen = item.classList.contains("open");
-      item.parentElement.querySelectorAll(".faq-item").forEach((i) => i.classList.remove("open"));
-      if (!wasOpen) item.classList.add("open");
+      const group = item.parentElement.querySelectorAll(".faq-item");
+      group.forEach((i2) => {
+        i2.classList.remove("open");
+        i2.querySelector(".faq-q")?.setAttribute("aria-expanded", "false");
+      });
+      if (!wasOpen) {
+        item.classList.add("open");
+        q.setAttribute("aria-expanded", "true");
+      }
+    };
+    q.addEventListener("click", toggle);
+    q.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle();
+      }
     });
   });
 }
@@ -121,25 +150,103 @@ function initGalleryFilter() {
 /* ---------- Lightbox ---------- */
 function initLightbox() {
   const lightbox = document.querySelector(".lightbox");
-  if (!lightbox) return;
+  const items = document.querySelectorAll(".gallery-item");
+  if (!lightbox || !items.length) return;
   const frame = lightbox.querySelector(".frame");
   const caption = lightbox.querySelector(".lightbox-cap");
   const closeBtn = lightbox.querySelector(".lightbox-close");
+  let lastFocused = null;
 
-  document.querySelectorAll(".gallery-item").forEach((item) => {
-    item.addEventListener("click", () => {
-      frame.innerHTML = item.querySelector(".thumb")?.innerHTML || item.innerHTML;
-      caption.textContent = item.dataset.caption || "";
-      lightbox.classList.add("open");
+  const open = (item) => {
+    lastFocused = document.activeElement;
+    frame.innerHTML = item.querySelector(".thumb")?.innerHTML || item.innerHTML;
+    caption.textContent = item.dataset.caption || "";
+    lightbox.classList.add("open");
+    closeBtn?.focus();
+  };
+  const close = () => {
+    lightbox.classList.remove("open");
+    lastFocused?.focus();
+  };
+
+  items.forEach((item) => {
+    item.setAttribute("role", "button");
+    item.setAttribute("tabindex", "0");
+    if (!item.hasAttribute("aria-label")) {
+      item.setAttribute("aria-label", `View larger photo: ${item.dataset.caption || "project photo"}`);
+    }
+    item.addEventListener("click", () => open(item));
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open(item);
+      }
     });
   });
-  const close = () => lightbox.classList.remove("open");
+
   closeBtn?.addEventListener("click", close);
   lightbox.addEventListener("click", (e) => {
     if (e.target === lightbox) close();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") close();
+    if (e.key === "Escape" && lightbox.classList.contains("open")) close();
+  });
+}
+
+/* ---------- Before / after comparison slider ---------- */
+function initBeforeAfter() {
+  document.querySelectorAll(".ba-wrap").forEach((wrap) => {
+    const before = wrap.querySelector(".ba-before");
+    const handle = wrap.querySelector(".ba-handle");
+    if (!before || !handle) return;
+
+    const setPct = (pct) => {
+      pct = Math.max(0, Math.min(100, pct));
+      before.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+      handle.style.left = pct + "%";
+      handle.setAttribute("aria-valuenow", String(Math.round(pct)));
+    };
+    const pctFromEvent = (e) => {
+      const rect = wrap.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      return ((clientX - rect.left) / rect.width) * 100;
+    };
+
+    let dragging = false;
+    handle.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      handle.setPointerCapture(e.pointerId);
+    });
+    wrap.addEventListener("pointermove", (e) => {
+      if (dragging) setPct(pctFromEvent(e));
+    });
+    ["pointerup", "pointercancel"].forEach((ev) =>
+      handle.addEventListener(ev, () => {
+        dragging = false;
+      })
+    );
+    wrap.addEventListener("click", (e) => {
+      if (e.target.closest(".ba-handle")) return;
+      setPct(pctFromEvent(e));
+    });
+    handle.addEventListener("keydown", (e) => {
+      const current = parseFloat(handle.style.left) || 50;
+      if (e.key === "ArrowLeft") {
+        setPct(current - 5);
+        e.preventDefault();
+      } else if (e.key === "ArrowRight") {
+        setPct(current + 5);
+        e.preventDefault();
+      } else if (e.key === "Home") {
+        setPct(0);
+        e.preventDefault();
+      } else if (e.key === "End") {
+        setPct(100);
+        e.preventDefault();
+      }
+    });
+
+    setPct(50);
   });
 }
 
