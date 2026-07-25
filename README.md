@@ -38,20 +38,16 @@ The site already looks complete with styled placeholder boxes where photos go.
 Open **[IMAGES.md](IMAGES.md)** for the exact list of filenames and folders —
 drop a matching file into `images/...` and it appears automatically, no code edits needed.
 
-## 3. Connect the contact form (Formspree — free)
+## 3. Contact form (Formspree — free) — already connected
 
-The form on `contact.html` posts to Formspree, a free service that emails you
-form submissions (GitHub Pages can't run server code, so this fills that gap).
+✅ Done. The form on `contact.html` posts to `https://formspree.io/f/xpqvoolq`,
+a Formspree account under `hello@mtopainting.com`. Submissions arrive by email
+to that inbox, and are also logged in the Formspree dashboard as a backup.
 
-1. Go to https://formspree.io and sign up free with `hello@mtopainting.com`.
-2. Create a new form. Formspree gives you a form ID / endpoint like
-   `https://formspree.io/f/abcdwxyz`.
-3. In `contact.html`, find this line:
-   ```html
-   <form id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-   ```
-   Replace `YOUR_FORM_ID` with your real ID.
-4. Confirm the verification email Formspree sends to `hello@mtopainting.com`.
+To manage it later (spam filtering, notification settings, etc.), log into
+formspree.io with `hello@mtopainting.com`. If the form ever needs to move to
+a different Formspree account, replace the `action` URL in `contact.html`'s
+`<form id="contact-form" action="...">` line with the new endpoint.
 
 Until this is done, the form will show a friendly message telling visitors to call
 or email directly instead — it won't silently fail.
