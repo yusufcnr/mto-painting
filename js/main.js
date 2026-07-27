@@ -254,8 +254,8 @@ function initBeforeAfter() {
 function initContactForm() {
   const form = document.querySelector("#contact-form");
   if (!form) return;
-  const success = form.querySelector(".form-success");
-  const error = form.querySelector(".form-error");
+  const success = document.querySelector(".form-success");
+  const error = document.querySelector(".form-error");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
