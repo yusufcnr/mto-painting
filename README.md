@@ -88,8 +88,9 @@ and several buttons on every page). No CMS, no database, no build step.
 
 ## Notes
 
-- **Testimonials** on the Home page are placeholders — swap them for real reviews
-  as soon as you have some (see the note at the bottom of `IMAGES.md`).
+- **Testimonials** on the Home page are 6 real Thumbtack reviews (see `reviews/`
+  for the full set of 26 — swap in different ones any time by editing the
+  "Customer Reviews" section in `index.html`).
 - **Service area list** (`service-areas.html`) was generated from a ~50-mile radius
   around Burlington, NJ. Feel free to trim or expand the city list as you learn
   which towns your customers actually come from.

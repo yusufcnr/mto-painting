@@ -73,5 +73,5 @@ on the live site automatically. No code changes needed.
 
 ## Also needed eventually
 
-- **Real customer testimonials** — 3 placeholder review cards on the Home page (`index.html`, "Customer Reviews" section) are marked with obvious placeholder text (`"Add a real customer quote here..."`). Swap in real Google/Facebook/Instagram reviews as you collect them — don't leave placeholder text live for long, since fake-looking reviews hurt trust more than none at all.
+- **Real customer testimonials** — done. The Home page "Customer Reviews" section now shows 6 real 5-star Thumbtack reviews, picked from the full set of 26 screenshotted reviews in `reviews/` (not committed to the repo — source images only, not needed once quotes are in the HTML). Swap in different ones any time by editing the cards in `index.html`.
 - A real favicon is already in place (`favicon.svg`, a simple navy/gold wordmark). Replace it later if you commission a full logo.
